@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * { box-sizing : border-box; font-family : consolas; }
+      body { background-color:#FFF;}
+      #result { }
+      table { width:100%;}
+      table th { width:10px; text-align:end; white-space:nowrap; }
+      input { width:100%; padding:8px; border-radius:10px; border:1px solid red;}
+      fieldset { border:1px solid red; border-radius : 10px; }
+      fieldset legend { display : inline-block; padding:0px 25px; color:red; font-weight : bolder; }
+    </style>
+  </head>
+
+  <body>
+    <h2>RSA Calculator</h2>
+    <table>
+      <tr>
+        <th>P</th>
+        <td><input type="number" id="p" class="editable" value="17" /></td>
+      </tr>
+      <tr>
+        <th>q</th>
+        <td><input type="number" id="q" class="editable" value="11" /></td>
+      </tr>
+      <tr>
+        <th>e</th>
+        <td><input type="number" id="e" class="editable" value="7" /></td>
+      </tr>
+      <tr>
+        <th>d</th>
+        <td><input type="number" id="d" class="editable" value="23" /></td>
+      </tr>
+      <tr>
+        <th>Plain</th>
+        <td><input type="number" id="plain" class="editable" value="111" /></td>
+      </tr>
+    </table>
+    <fieldset>
+      <legend>RESULT : must change input values</legend>
+      <div id="result"></div>
+    </fieldset>
+
+    <script>
+      var calc = (event) => {
+          let p = document.getElementById('p').value || 1,
+              plain = document.getElementById('plain').value || 1,
+              q = document.getElementById('q').value || 1,
+              e = document.getElementById('e').value || 1,
+              d = document.getElementById('d').value || 1;
+
+          let pw = (num, pow) => {
+              let n = p * q;
+              let join = (arr, x = (a, b) => { }) => Array(Math.ceil(arr.length / 2)).fill('').map((e, i) => x(arr[i * 2], arr[(i * 2) + 1] || 1));
+              let arr = [], dev = (pw) => (num ** pw) % n, px = 0;
+              while (px < pow) { arr.push(dev((pow - px < 2) ? (pow - px) : 2)); px += 2; }
+              while (arr.length > 2) arr = join(arr, (a, b) => (a * b) % n);
+              return (arr.reduce((a, b) => a *= b) % n);
+          };
+          let enc = (num) => pw(num, e), dec = (num) => pw(num, d);
+          document.getElementById('result').innerHTML = (`
+          p = ${p} , q = ${q} , e = ${e} , d = ${d} , n = ${p * q}
+          <hr>
+          ► plain to cipher : ${enc(plain)}
+          ► cipher to plain : ${dec(enc(plain))}
+          <hr>
+          SYSTEM MESSAGE : ${(plain > (p * q) - 1 ? '[×] error plain number > n ' : '[►] plain number is ok')}
+                    `.trim().split(`\n`).map(m=>m.trim()).join('<br/>'));
+      };
+      Array.from(document.getElementsByClassName("editable")).forEach(e => { e.addEventListener("change", (event) => { calc(null); }); });
+      calc()
+    </script>
+  </body>
+</html>
